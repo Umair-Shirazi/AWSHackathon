@@ -101,7 +101,7 @@ def generate_synthetic_data(n=1000):
 try:
     df = pd.read_csv("customer_churn_data.csv")
 except:
-    df = generate_synthetic_data(10000)
+    df = generate_synthetic_data(1000)  # Reduced to 1000 to avoid memory issues
 
 # Sidebar filters
 st.sidebar.title("Filter Dashboard")
@@ -172,9 +172,13 @@ with col1:
 with col2:
     st.subheader("Churn Risk By Income")
     
-    # Group by income ranges
-    df['income_range'] = pd.cut(df['income'], bins=10)
-    income_risk = df.groupby('income_range')['churn_risk'].mean().reset_index()
+    # Group by income ranges - using numeric bins to avoid Interval objects
+    income_bins = np.linspace(df['income'].min(), df['income'].max(), 11)
+    df['income_bin'] = pd.cut(df['income'], bins=income_bins)
+    
+    # Convert interval objects to strings to make them JSON serializable
+    income_risk = df.groupby('income_bin')['churn_risk'].mean().reset_index()
+    income_risk['income_bin'] = income_risk['income_bin'].astype(str)
     income_risk['income_pct'] = np.linspace(0, 100, len(income_risk))
     
     fig = px.bar(
@@ -200,11 +204,10 @@ with col1:
     st.subheader("Which Segments Are Likely To Leave?")
     
     # Create a scatter plot with spending vs churn risk
-    # Sample a smaller number or use the entire dataset if it's small
-    sample_size = min(100, len(df))  # Use at most 100 records or the entire dataset if smaller
+    sample_size = min(500, len(df))
     
     fig = px.scatter(
-        df.sample(sample_size) if len(df) > sample_size else df,  # Sample appropriately
+        df.sample(sample_size) if len(df) > sample_size else df,
         x='spending',
         y='churn_risk',
         color='status',
@@ -331,14 +334,19 @@ with col1:
     
     st.plotly_chart(fig, use_container_width=True)
 
-# Churn by Contract Age
+# Churn by Contract Age - FIXED to avoid Interval objects
 with col2:
-    df['contract_age_bin'] = pd.cut(df['contract_age'], bins=10)
-    contract_age_churn = df.groupby('contract_age_bin')['churned'].mean().reset_index()
+    # Create numeric bins instead of Interval objects
+    age_bins = list(range(0, df['contract_age'].max() + 6, 5))
+    labels = [f"{i}-{i+5}" for i in range(0, df['contract_age'].max(), 5)]
+    
+    # Group by these bins
+    df['contract_age_group'] = pd.cut(df['contract_age'], bins=age_bins, labels=labels)
+    contract_age_churn = df.groupby('contract_age_group')['churned'].mean().reset_index()
     
     fig = px.line(
         contract_age_churn,
-        x='contract_age_bin',
+        x='contract_age_group',
         y='churned',
         title='Churn by Contract Age',
         height=300
@@ -346,14 +354,21 @@ with col2:
     
     st.plotly_chart(fig, use_container_width=True)
 
-# Churn by Contract Size
+# Churn by Contract Size - FIXED to avoid Interval objects
 with col3:
-    df['contract_size_bin'] = pd.cut(df['contract_size'], bins=10)
-    contract_size_churn = df.groupby('contract_size_bin')['churned'].mean().reset_index()
+    # Create numeric bins
+    size_range = df['contract_size'].max() - df['contract_size'].min()
+    size_step = size_range // 10
+    size_bins = list(range(int(df['contract_size'].min()), int(df['contract_size'].max()) + size_step, size_step))
+    size_labels = [f"{i/1000:.0f}k" for i in size_bins[:-1]]
+    
+    # Group by these bins
+    df['contract_size_group'] = pd.cut(df['contract_size'], bins=size_bins[:-1], labels=size_labels)
+    contract_size_churn = df.groupby('contract_size_group')['churned'].mean().reset_index()
     
     fig = px.line(
         contract_size_churn,
-        x='contract_size_bin',
+        x='contract_size_group',
         y='churned',
         title='Churn by Contract Size',
         height=300
@@ -379,14 +394,21 @@ with col1:
     
     st.plotly_chart(fig, use_container_width=True)
 
-# Churn by Contract Volume
+# Churn by Contract Volume - FIXED to avoid Interval objects
 with col2:
-    df['contract_volume_bin'] = pd.cut(df['contract_volume'], bins=10)
-    volume_churn = df.groupby('contract_volume_bin')['churned'].mean().reset_index()
+    # Create numeric bins
+    volume_range = df['contract_volume'].max() - df['contract_volume'].min()
+    volume_step = volume_range // 10
+    volume_bins = list(range(int(df['contract_volume'].min()), int(df['contract_volume'].max()) + volume_step, volume_step))
+    volume_labels = [f"{i}" for i in volume_bins[:-1]]
+    
+    # Group by these bins
+    df['contract_volume_group'] = pd.cut(df['contract_volume'], bins=volume_bins[:-1], labels=volume_labels)
+    volume_churn = df.groupby('contract_volume_group')['churned'].mean().reset_index()
     
     fig = px.line(
         volume_churn,
-        x='contract_volume_bin',
+        x='contract_volume_group',
         y='churned',
         title='Churn by Contract Volume',
         height=300
@@ -394,17 +416,24 @@ with col2:
     
     st.plotly_chart(fig, use_container_width=True)
 
-# Tenure to Churn
+# Tenure to Churn - FIXED to avoid Interval objects
 with col3:
-    df['tenure_bin'] = pd.cut(df['tenure'], bins=10)
-    tenure_churn = df.groupby('tenure_bin')['churned'].mean().reset_index()
+    # Create numeric bins
+    tenure_range = df['tenure'].max() - df['tenure'].min()
+    tenure_step = tenure_range // 10
+    tenure_bins = list(range(int(df['tenure'].min()), int(df['tenure'].max()) + tenure_step, tenure_step))
+    tenure_labels = [f"{i}" for i in tenure_bins[:-1]]
+    
+    # Group by these bins
+    df['tenure_group'] = pd.cut(df['tenure'], bins=tenure_bins[:-1], labels=tenure_labels)
+    tenure_churn = df.groupby('tenure_group')['churned'].mean().reset_index()
     
     fig = px.bar(
         tenure_churn,
-        x='tenure_bin',
+        x='tenure_group',
         y='churned',
         title='Tenure To Churn',
-        color='tenure_bin',
+        color='tenure_group',
         height=300
     )
     
@@ -413,17 +442,24 @@ with col3:
 # Row 4
 col1, col2 = st.columns(2)
 
-# Balance to Churn
+# Balance to Churn - FIXED to avoid Interval objects
 with col1:
-    df['balance_bin'] = pd.cut(df['balance'], bins=10)
-    balance_churn = df.groupby('balance_bin')['churned'].mean().reset_index()
+    # Create numeric bins
+    balance_range = df['balance'].max() - df['balance'].min()
+    balance_step = balance_range // 10
+    balance_bins = list(range(int(df['balance'].min()), int(df['balance'].max()) + balance_step, balance_step))
+    balance_labels = [f"{i/1000:.0f}k" for i in balance_bins[:-1]]
+    
+    # Group by these bins
+    df['balance_group'] = pd.cut(df['balance'], bins=balance_bins[:-1], labels=balance_labels)
+    balance_churn = df.groupby('balance_group')['churned'].mean().reset_index()
     
     fig = px.bar(
         balance_churn,
-        x='balance_bin',
+        x='balance_group',
         y='churned',
         title='Balance To Churn',
-        color='balance_bin',
+        color='balance_group',
         height=300
     )
     
