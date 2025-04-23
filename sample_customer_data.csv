@@ -1,0 +1,51 @@
+name,tier,churn_score,last_booking_days,suggested_reward
+Customer_1,Gold,0.79,172,Travel Experience Voucher
+Customer_2,Platinum,0.35,298,Free Upgrade
+Customer_3,Bronze,0.59,388,Free Upgrade
+Customer_4,Gold,0.64,270,VIP Lounge Access
+Customer_5,Gold,0.23,240,20% Discount
+Customer_6,Platinum,0.66,50,20% Discount
+Customer_7,Bronze,0.33,37,Travel Experience Voucher
+Customer_8,Bronze,0.25,144,10% Discount
+Customer_9,Gold,0.91,210,Travel Experience Voucher
+Customer_10,Silver,0.92,337,VIP Lounge Access
+Customer_11,Gold,0.81,277,VIP Lounge Access
+Customer_12,Gold,0.43,42,VIP Lounge Access
+Customer_13,Gold,0.27,57,VIP Lounge Access
+Customer_14,Gold,0.71,71,VIP Lounge Access
+Customer_15,Platinum,0.53,225,Free Upgrade
+Customer_16,Bronze,0.29,302,20% Discount
+Customer_17,Platinum,0.57,108,VIP Lounge Access
+Customer_18,Platinum,0.23,181,10% Discount
+Customer_19,Platinum,0.88,369,10% Discount
+Customer_20,Gold,0.39,223,10% Discount
+Customer_21,Silver,0.7,44,10% Discount
+Customer_22,Bronze,0.43,236,Free Upgrade
+Customer_23,Silver,0.59,110,10% Discount
+Customer_24,Platinum,0.61,140,VIP Lounge Access
+Customer_25,Platinum,0.34,266,Travel Experience Voucher
+Customer_26,Silver,0.93,14,10% Discount
+Customer_27,Silver,0.78,227,Free Upgrade
+Customer_28,Silver,0.9,264,Free Upgrade
+Customer_29,Platinum,0.87,368,10% Discount
+Customer_30,Platinum,0.65,292,Travel Experience Voucher
+Customer_31,Bronze,0.89,216,10% Discount
+Customer_32,Bronze,0.27,24,Free Upgrade
+Customer_33,Platinum,0.35,355,20% Discount
+Customer_34,Silver,0.23,51,VIP Lounge Access
+Customer_35,Silver,0.44,389,Free Upgrade
+Customer_36,Bronze,0.49,188,10% Discount
+Customer_37,Platinum,0.4,72,VIP Lounge Access
+Customer_38,Bronze,0.82,361,10% Discount
+Customer_39,Bronze,0.47,240,10% Discount
+Customer_40,Gold,0.41,250,20% Discount
+Customer_41,Gold,0.61,61,VIP Lounge Access
+Customer_42,Gold,0.31,105,VIP Lounge Access
+Customer_43,Silver,0.8,397,20% Discount
+Customer_44,Platinum,0.26,231,Free Upgrade
+Customer_45,Platinum,0.94,240,10% Discount
+Customer_46,Platinum,0.78,246,Travel Experience Voucher
+Customer_47,Platinum,0.35,152,10% Discount
+Customer_48,Gold,0.2,180,10% Discount
+Customer_49,Silver,0.81,38,Free Upgrade
+Customer_50,Silver,0.73,45,10% Discount
