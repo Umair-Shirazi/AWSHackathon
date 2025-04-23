@@ -200,8 +200,11 @@ with col1:
     st.subheader("Which Segments Are Likely To Leave?")
     
     # Create a scatter plot with spending vs churn risk
+    # Sample a smaller number or use the entire dataset if it's small
+    sample_size = min(100, len(df))  # Use at most 100 records or the entire dataset if smaller
+    
     fig = px.scatter(
-        df.sample(500),  # Sample for better visualization
+        df.sample(sample_size) if len(df) > sample_size else df,  # Sample appropriately
         x='spending',
         y='churn_risk',
         color='status',
