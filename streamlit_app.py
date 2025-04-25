@@ -535,90 +535,75 @@ else:
 st.markdown("---")
 st.title("Customer Explorer")
 
+# Create a single dropdown for customer selection with search functionality
+# Prepare the list of customer options with names and IDs
+customer_options = [""] + [f"{row['name']} (ID: {row['customer_id']})" for _, row in df.iterrows()]
 
-# Create a more efficient search with autocomplete
-# First, let's create a function to filter the options based on input
-def filter_customer_options(search_input):
-    if not search_input:
-        return []
+# Create the searchable dropdown
+selected_customer = st.selectbox(
+    "Select a customer",
+    options=customer_options,
+    index=0
+)
 
-    # Filter customers whose name or ID contains the search input
-    filtered_customers = df[
-        df['name'].str.contains(search_input, case=False) |
-        df['customer_id'].astype(str).str.contains(search_input)
-        ]
-
-    # Return formatted options (limit to first 10 matches for performance)
-    return [f"{row['name']} (ID: {row['customer_id']})" for _, row in filtered_customers.head(10).iterrows()]
-
-
-# Add a text input for search with autocomplete
-search_input = st.text_input("Type to search customers")
-options = filter_customer_options(search_input)
-
-# Show matching options as a selectbox if we have input and matches
-if search_input and options:
-    selected_customer = st.selectbox("Select a customer", options)
-
+# Process the selection if a customer was chosen
+if selected_customer:
     # Extract customer ID from the selection
-    if selected_customer:
-        customer_id = selected_customer.split("ID: ")[1].strip(")")
-        customer = df[df['customer_id'].astype(str) == customer_id].iloc[0]
+    customer_id = selected_customer.split("ID: ")[1].strip(")")
+    customer = df[df['customer_id'].astype(str) == customer_id].iloc[0]
 
-        col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-        with col1:
-            st.subheader(f"Customer Profile: {customer['name']}")
-            st.write(f"**Customer ID:** {customer['customer_id']}")
-            st.write(f"**Age:** {customer['age']}")
-            st.write(f"**Gender:** {customer['gender']}")
-            st.write(f"**Location:** {customer['location']}")
-            st.write(f"**Loyalty Tier:** {customer['loyalty_tier']}")
-            st.write(f"**Signup Date:** {customer['signup_date']}")
-            st.write(f"**Segment:** {customer['segment_name']}")
+    with col1:
+        st.subheader(f"Customer Profile: {customer['name']}")
+        st.write(f"**Customer ID:** {customer['customer_id']}")
+        st.write(f"**Age:** {customer['age']}")
+        st.write(f"**Gender:** {customer['gender']}")
+        st.write(f"**Location:** {customer['location']}")
+        st.write(f"**Loyalty Tier:** {customer['loyalty_tier']}")
+        st.write(f"**Signup Date:** {customer['signup_date']}")
+        st.write(f"**Segment:** {customer['segment_name']}")
 
-        with col2:
-            st.subheader("Customer Metrics")
-            st.write(f"**Total Bookings:** {customer['total_bookings']}")
-            st.write(f"**Total Spend:** ${customer['total_spend']:.2f}")
-            st.write(
-                f"**Last Booking:** {customer['last_booking_date'].strftime('%Y-%m-%d')} ({customer['days_since_last_booking']} days ago)")
-            st.write(f"**Days Since Login:** {customer['days_since_login']:.0f}")
-            st.write(f"**Search Activity (30d):** {customer['search_activity_last_30d']}")
-            st.write(f"**Campaign Clicks (90d):** {customer['campaign_clicks_last_90d']}")
+    with col2:
+        st.subheader("Customer Metrics")
+        st.write(f"**Total Bookings:** {customer['total_bookings']}")
+        st.write(f"**Total Spend:** ${customer['total_spend']:.2f}")
+        st.write(
+            f"**Last Booking:** {customer['last_booking_date'].strftime('%Y-%m-%d')} ({customer['days_since_last_booking']} days ago)")
+        st.write(f"**Days Since Login:** {customer['days_since_login']:.0f}")
+        st.write(f"**Search Activity (30d):** {customer['search_activity_last_30d']}")
+        st.write(f"**Campaign Clicks (90d):** {customer['campaign_clicks_last_90d']}")
 
-            # Calculate and display churn risk with color coding
-            churn_risk = customer['churn_risk'] * 100
-            risk_color = "red" if churn_risk > 70 else "orange" if churn_risk > 40 else "green"
-            st.markdown(f"**Churn Risk:** <span style='color:{risk_color};font-weight:bold'>{churn_risk:.1f}%</span>",
-                        unsafe_allow_html=True)
+        # Calculate and display churn risk with color coding
+        churn_risk = customer['churn_risk'] * 100
+        risk_color = "red" if churn_risk > 70 else "orange" if churn_risk > 40 else "green"
+        st.markdown(f"**Churn Risk:** <span style='color:{risk_color};font-weight:bold'>{churn_risk:.1f}%</span>",
+                    unsafe_allow_html=True)
 
-        # Recommend rewards for this customer
-        st.subheader("Personalized Reward Recommendations")
-        reward = recommend_rewards(customer, rewards_df)
+    # Recommend rewards for this customer
+    st.subheader("Personalized Reward Recommendations")
+    reward = recommend_rewards(customer, rewards_df)
 
-        if reward is not None:
-            st.write(f"**Recommended Reward Type:** {reward['reward_type']}")
-            st.write(f"**Description:** {reward['description']}")
-            st.write(f"**Estimated Value:** ${reward['estimated_value_usd']:.2f}")
+    if reward is not None:
+        st.write(f"**Recommended Reward Type:** {reward['reward_type']}")
+        st.write(f"**Description:** {reward['description']}")
+        st.write(f"**Estimated Value:** ${reward['estimated_value_usd']:.2f}")
 
-            # Recommend additional actions
-            st.subheader("Recommended Actions")
-            if customer['churn_risk'] > 0.7:
-                st.write("1. **High Priority Outreach:** Personal contact from customer service")
-                st.write("2. **Special Offer:** Time-limited discount on next booking")
-                st.write("3. **Feedback Request:** Survey to understand pain points")
-            elif customer['churn_risk'] > 0.4:
-                st.write("1. **Email Campaign:** Targeted re-engagement content")
-                st.write("2. **Loyalty Reminder:** Summary of available points and rewards")
-                st.write("3. **App Notification:** New destinations based on past preferences")
-            else:
-                st.write("1. **Maintain Relationship:** Regular newsletter and updates")
-                st.write("2. **Cross-sell:** Suggestions for complementary travel products")
+        # Recommend additional actions
+        st.subheader("Recommended Actions")
+        if customer['churn_risk'] > 0.7:
+            st.write("1. **High Priority Outreach:** Personal contact from customer service")
+            st.write("2. **Special Offer:** Time-limited discount on next booking")
+            st.write("3. **Feedback Request:** Survey to understand pain points")
+        elif customer['churn_risk'] > 0.4:
+            st.write("1. **Email Campaign:** Targeted re-engagement content")
+            st.write("2. **Loyalty Reminder:** Summary of available points and rewards")
+            st.write("3. **App Notification:** New destinations based on past preferences")
         else:
-            st.write("No specific reward recommendations available.")
-elif search_input:
-    st.info("No customers found matching that search term.")
+            st.write("1. **Maintain Relationship:** Regular newsletter and updates")
+            st.write("2. **Cross-sell:** Suggestions for complementary travel products")
+    else:
+        st.write("No specific reward recommendations available.")
 
 # Footer
 st.markdown("---")
