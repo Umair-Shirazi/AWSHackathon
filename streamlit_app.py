@@ -11,6 +11,54 @@ from sklearn.cluster import KMeans
 # Page configuration
 st.set_page_config(layout="wide", page_title="Travel Loyalty & Churn Dashboard")
 
+# Custom CSS for the floating chat button
+st.markdown("""
+<style>
+.floating-chat-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.floating-chat-button:hover {
+    transform: scale(1.1);
+    background-color: #45a049;
+}
+
+.floating-chat-button a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+</style>
+
+<div class="floating-chat-button">
+    <a href="http://localhost:3000/" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </a>
+</div>
+""", unsafe_allow_html=True)
+
 
 # Function to generate synthetic travel customer data
 def generate_travel_customer_data(n=1000):
@@ -121,12 +169,10 @@ except:
 st.title("Travel Loyalty & Churn Dashboard")
 st.subheader("Customer Retention Analysis & Reward Recommendations")
 
-# Sidebar filters
-st.sidebar.title("Filter Dashboard")
-risk_filter = st.sidebar.slider("Churn Risk Threshold", 0.0, 1.0, 0.5, 0.05)
-loyalty_filter = st.sidebar.multiselect("Loyalty Tier", options=df['loyalty_tier'].unique(),
-                                        default=df['loyalty_tier'].unique())
-location_filter = st.sidebar.multiselect("Location", options=df['location'].unique(), default=df['location'].unique())
+# Define default filters (replacing the sidebar filters)
+risk_filter = 0.5  # Default churn risk threshold
+loyalty_filter = df['loyalty_tier'].unique()  # All loyalty tiers
+location_filter = df['location'].unique()  # All locations
 
 # Apply filters
 filtered_df = df[(df['churn_risk'] >= risk_filter) &
