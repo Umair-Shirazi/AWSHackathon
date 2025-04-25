@@ -535,16 +535,23 @@ else:
 st.markdown("---")
 st.title("Customer Explorer")
 
-# Search by customer ID or name
+# Search by customer ID or name with suggestions
 search_term = st.text_input("Search Customer by ID or Name")
-
 if search_term:
-    results = df[df['name'].str.contains(search_term, case=False) |
-                 df['customer_id'].astype(str).str.contains(search_term)]
+    # Filter customers based on the search term
+    suggestions = df[df['name'].str.contains(search_term, case=False) |
+                     df['customer_id'].astype(str).str.contains(search_term)]
+    if not suggestions.empty:
+        # Show suggestions in a selectbox
+        selected_customer = st.selectbox(
+            "Select a Customer",
+            suggestions['name'] + " (ID: " + suggestions['customer_id'].astype(str) + ")"
+        )
+        # Extract the selected customer's details
+        customer_id = int(selected_customer.split("ID: ")[1].strip(")"))
+        customer = df[df['customer_id'] == customer_id].iloc[0]
 
-    if not results.empty:
-        customer = results.iloc[0]
-
+        # Display customer details
         col1, col2 = st.columns(2)
 
         with col1:
