@@ -535,23 +535,36 @@ else:
 st.markdown("---")
 st.title("Customer Explorer")
 
-# Search by customer ID or name with suggestions
-search_term = st.text_input("Search Customer by ID or Name")
-if search_term:
-    # Filter customers based on the search term
-    suggestions = df[df['name'].str.contains(search_term, case=False) |
-                     df['customer_id'].astype(str).str.contains(search_term)]
-    if not suggestions.empty:
-        # Show suggestions in a selectbox
-        selected_customer = st.selectbox(
-            "Select a Customer",
-            suggestions['name'] + " (ID: " + suggestions['customer_id'].astype(str) + ")"
-        )
-        # Extract the selected customer's details
-        customer_id = int(selected_customer.split("ID: ")[1].strip(")"))
-        customer = df[df['customer_id'] == customer_id].iloc[0]
 
-        # Display customer details
+# Create a more efficient search with autocomplete
+# First, let's create a function to filter the options based on input
+def filter_customer_options(search_input):
+    if not search_input:
+        return []
+
+    # Filter customers whose name or ID contains the search input
+    filtered_customers = df[
+        df['name'].str.contains(search_input, case=False) |
+        df['customer_id'].astype(str).str.contains(search_input)
+        ]
+
+    # Return formatted options (limit to first 10 matches for performance)
+    return [f"{row['name']} (ID: {row['customer_id']})" for _, row in filtered_customers.head(10).iterrows()]
+
+
+# Add a text input for search with autocomplete
+search_input = st.text_input("Type to search customers")
+options = filter_customer_options(search_input)
+
+# Show matching options as a selectbox if we have input and matches
+if search_input and options:
+    selected_customer = st.selectbox("Select a customer", options)
+
+    # Extract customer ID from the selection
+    if selected_customer:
+        customer_id = selected_customer.split("ID: ")[1].strip(")")
+        customer = df[df['customer_id'].astype(str) == customer_id].iloc[0]
+
         col1, col2 = st.columns(2)
 
         with col1:
@@ -604,8 +617,8 @@ if search_term:
                 st.write("2. **Cross-sell:** Suggestions for complementary travel products")
         else:
             st.write("No specific reward recommendations available.")
-    else:
-        st.write("No customers found matching that search term.")
+elif search_input:
+    st.info("No customers found matching that search term.")
 
 # Footer
 st.markdown("---")
